@@ -9,20 +9,22 @@ import org.ludus.ft7bot.command.Command;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class CommandListener extends ListenerAdapter  {
-
-    private final List<Command> commands;
+    private final Map<String, Command> commands;
 
     public CommandListener(List<Command> commands) {
-        this.commands = commands;
+        this.commands = commands.stream().collect(Collectors.toMap(Command::getName, Function.identity()));
     }
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
         for(Guild guild : event.getJDA().getGuilds()) {
-            for(Command command : commands) {
+            for(Command command : commands.values()) {
                 if(command.getOptions() == null) {
                     guild.upsertCommand(command.getName(), command.getDescription()).queue();
                 } else {
@@ -34,11 +36,8 @@ public class CommandListener extends ListenerAdapter  {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        for(Command command : commands) {
-            if(command.getName().equals(event.getName())) {
-                command.execute(event);
-                return;
-            }
+        if (commands.containsKey(event.getName())) {
+            commands.get(event.getName()).execute(event);
         }
     }
 }

@@ -45,11 +45,13 @@ public class RegisterCommand implements Command {
             String discordId = event.getUser().getId();
             if (playerRepository.existsByDiscordId(discordId)) {
                 event.reply("A player with this discord id has already been registered.").setEphemeral(true).queue();
+                return;
             }
 
             String username = event.getOption(USERNAME_OPTION).getAsString();
             if (playerRepository.existsByUsername(username)) {
                 event.reply("A player with this username has already been registered.").setEphemeral(true).queue();
+                return;
             }
 
             PlayerEntity playerEntity = new PlayerEntity();

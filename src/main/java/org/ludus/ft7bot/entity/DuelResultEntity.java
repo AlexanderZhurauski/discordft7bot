@@ -41,6 +41,20 @@ public class DuelResultEntity {
     @JoinColumn(name = "loser_id")
     private PlayerEntity loser;
 
+    @ManyToOne
+    @JoinColumn(name = "challenger_id")
+    private PlayerEntity challenger;
+
+    @ManyToOne
+    @JoinColumn(name = "opponent_id")
+    private PlayerEntity opponent;
+
+    @Column
+    private Integer challengerScore;
+
+    @Column
+    private Integer opponentScore;
+
     @Column
     private Double eloGain;
 

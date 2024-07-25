@@ -15,7 +15,7 @@ import java.util.List;
 public class RegisterCommand implements Command {
     private static final Logger LOG = LoggerFactory.getLogger(RegisterCommand.class);
     private static final String USERNAME_OPTION = "username";
-    private PlayerRepository playerRepository;
+    private final PlayerRepository playerRepository;
 
     public RegisterCommand(PlayerRepository playerRepository) {
         this.playerRepository = playerRepository;
@@ -42,19 +42,19 @@ public class RegisterCommand implements Command {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
         try {
-            String discordId = event.getUser().getId();
+            final String discordId = event.getUser().getId();
             if (playerRepository.existsByDiscordId(discordId)) {
                 event.reply("A player with this discord id has already been registered.").setEphemeral(true).queue();
                 return;
             }
 
-            String username = event.getOption(USERNAME_OPTION).getAsString();
+            final String username = event.getOption(USERNAME_OPTION).getAsString();
             if (playerRepository.existsByUsername(username)) {
                 event.reply("A player with this username has already been registered.").setEphemeral(true).queue();
                 return;
             }
 
-            PlayerEntity playerEntity = new PlayerEntity();
+            final PlayerEntity playerEntity = new PlayerEntity();
             playerEntity.setDiscordId(discordId);
             playerEntity.setUsername(username);
             playerRepository.save(playerEntity);

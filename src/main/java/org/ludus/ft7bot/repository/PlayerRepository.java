@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
     boolean existsByDiscordId(String discordId);
     boolean existsByUsername(String username);
+    PlayerEntity findByDiscordId(String discordId);
 }

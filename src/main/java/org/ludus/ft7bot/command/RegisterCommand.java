@@ -3,6 +3,8 @@ package org.ludus.ft7bot.command;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import org.ludus.ft7bot.constant.CommandName;
+import org.ludus.ft7bot.constant.Message;
 import org.ludus.ft7bot.entity.PlayerEntity;
 import org.ludus.ft7bot.repository.PlayerRepository;
 import org.slf4j.Logger;
@@ -23,7 +25,7 @@ public class RegisterCommand implements Command {
 
     @Override
     public String getName() {
-        return "register";
+        return CommandName.REGISTER;
     }
 
     @Override
@@ -44,13 +46,13 @@ public class RegisterCommand implements Command {
         try {
             final String discordId = event.getUser().getId();
             if (playerRepository.existsByDiscordId(discordId)) {
-                event.reply("A player with this discord id has already been registered.").setEphemeral(true).queue();
+                event.reply(Message.DISCORD_ID_ALREADY_REGISTERED).setEphemeral(true).queue();
                 return;
             }
 
             final String username = event.getOption(USERNAME_OPTION).getAsString();
             if (playerRepository.existsByUsername(username)) {
-                event.reply("A player with this username has already been registered.").setEphemeral(true).queue();
+                event.reply(Message.USERNAME_ALREADY_REGISTERED).setEphemeral(true).queue();
                 return;
             }
 
@@ -58,10 +60,10 @@ public class RegisterCommand implements Command {
             playerEntity.setDiscordId(discordId);
             playerEntity.setUsername(username);
             playerRepository.save(playerEntity);
-            event.reply(username + " has successfully been registered!").setEphemeral(true).queue();
+            event.reply(Message.SUCCESSFUL_REGISTRATION.formatted(username)).setEphemeral(true).queue();
         } catch (Exception e) {
-            LOG.error("Unexpected error during registration:", e);
-            event.reply("Unexpected error during registration, please contact the server administrator.").setEphemeral(true).queue();
+            LOG.error(Message.REGISTRATION_UNEXPECTED_ERROR, e);
+            event.reply(Message.REGISTRATION_UNEXPECTED_ERROR).setEphemeral(true).queue();
         }
     }
 }

@@ -4,6 +4,8 @@ package org.ludus.ft7bot.util;
  * Shamelessly "borrowed" from <a href="https://www.geeksforgeeks.org/elo-rating-algorithm/"></a>
  */
 public class EloUtil {
+    public static final int WIN = 1;
+    public static final int LOSS = 0;
     private static final int K = 32; // This is a typical value but can be adjusted depending on the level of the players
 
     /**
@@ -13,7 +15,7 @@ public class EloUtil {
      * @param outcome 1 if the player wins, 0 if the player loses.
      * @return Updated Elo rating of the player.
      */
-    public static double calculateNewElo(double currentRating, double opponentRating, short outcome) {
+    public static double calculateNewElo(double currentRating, double opponentRating, int outcome) {
         // Calculate the probability of winning for the player against this specific opponent
         double expectedScore = Probability(currentRating, opponentRating);
 

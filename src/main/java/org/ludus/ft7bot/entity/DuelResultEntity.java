@@ -50,12 +50,6 @@ public class DuelResultEntity {
     private PlayerEntity opponent;
 
     @Column
-    private Integer challengerScore;
-
-    @Column
-    private Integer opponentScore;
-
-    @Column
     private Double eloGain;
 
     @Column

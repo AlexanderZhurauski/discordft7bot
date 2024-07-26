@@ -5,6 +5,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.ludus.ft7bot.constant.Buttons;
+import org.ludus.ft7bot.constant.CommandName;
+import org.ludus.ft7bot.constant.Message;
 import org.ludus.ft7bot.entity.DuelResultEntity;
 import org.ludus.ft7bot.entity.PlayerEntity;
 import org.ludus.ft7bot.model.DuelStatus;
@@ -28,7 +30,7 @@ public class Ft7Command implements Command {
 
     @Override
     public String getName() {
-        return "ft7";
+        return CommandName.FT7;
     }
 
     @Override
@@ -49,18 +51,18 @@ public class Ft7Command implements Command {
     public void execute(SlashCommandInteractionEvent event) {
         final String challengerId = event.getUser().getId();
         if (!playerRepository.existsByDiscordId(challengerId)) {
-            event.reply("Please register in the ft7 system using the '/register <username>' command.").setEphemeral(true).queue();
+            event.reply(Message.CHALLENGER_NOT_REGISTERED).setEphemeral(true).queue();
             return;
         }
 
         final String opponentId = event.getOption(PLAYER_OPTION).getAsUser().getId();
         if (!playerRepository.existsByDiscordId(opponentId)) {
-            event.reply("The player you have challenged has not registered in the ft7 system.").setEphemeral(true).queue();
+            event.reply(Message.OPPONENT_NOT_REGISTERED).setEphemeral(true).queue();
             return;
         }
 
         if (challengerId.equals(opponentId)) {
-            event.reply("No, you can't challenge yourself to a ft7 :).").setEphemeral(true).queue();
+            event.reply(Message.SELF_CHALLENGE_IMPOSSIBLE).setEphemeral(true).queue();
             return;
         }
 
@@ -75,11 +77,14 @@ public class Ft7Command implements Command {
 
         event.getOption(PLAYER_OPTION).getAsUser()
                 .openPrivateChannel()
-                .queue((channel) -> channel.sendMessage("You have been challenged to a ft7 by %s, would you like to accept?"
-                .formatted(challenger.getUsername()))
+                .queue((channel) -> channel.sendMessage(Message.FT7_CHALLENGE_RECEIVED
+                                .formatted(challenger.getUsername()))
                         .setActionRow(
-                                Button.primary(Buttons.ACCEPTED_BUTTON + Buttons.SEPARATOR + savedDuelResultEntity.getNumId(), "Accept"),
-                                Button.danger(Buttons.REJECTED_BUTTON + Buttons.SEPARATOR + savedDuelResultEntity.getNumId(), "Reject")
+                                Button.primary(Buttons.ACCEPTED_BUTTON + Buttons.SEPARATOR
+                                        + savedDuelResultEntity.getNumId(), "Accept"),
+                                Button.danger(Buttons.REJECTED_BUTTON + Buttons.SEPARATOR
+                                        + savedDuelResultEntity.getNumId(), "Reject")
                         ).queue());
+        event.reply(Message.FT7_CHALLENGE_SENT.formatted(opponent.getUsername())).setEphemeral(true).queue();
     }
 }

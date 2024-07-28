@@ -38,10 +38,9 @@ public class LeaderboardCommand implements Command {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle("Leaderboard");
         eb.setColor(0xF1C40F);
-        eb.setDescription("Top Players!");
 
         for (PlayerEntity player : playerRepository.findAllByOrderByEloDesc()) {
-            eb.addField(player.getUsername(), "Rating: " + player.getElo(), true);
+            eb.addField(player.getUsername(), "Rating: " + player.getElo(), false);
         }
 
         event.replyEmbeds(eb.build()).setEphemeral(true).queue();

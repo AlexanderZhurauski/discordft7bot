@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.ludus.ft7bot.constant.Buttons;
 import org.ludus.ft7bot.constant.CommandName;
 import org.ludus.ft7bot.constant.Message;
+import org.ludus.ft7bot.constant.OptionName;
 import org.ludus.ft7bot.entity.DuelEntity;
 import org.ludus.ft7bot.entity.PlayerEntity;
 import org.ludus.ft7bot.repository.DuelRepository;
@@ -18,7 +19,6 @@ import java.util.List;
 
 @Component
 public class Ft7Command implements Command {
-    private static final String PLAYER_OPTION = "player";
     private final DuelRepository duelRepository;
     private final PlayerRepository playerRepository;
 
@@ -40,7 +40,7 @@ public class Ft7Command implements Command {
     @Override
     public List<OptionData> getOptions() {
         return List.of(new OptionData(OptionType.USER,
-                PLAYER_OPTION,
+                OptionName.PLAYER_OPTION,
                 "The player to challenge",
                 true));
     }
@@ -54,7 +54,7 @@ public class Ft7Command implements Command {
             return;
         }
 
-        final String opponentId = event.getOption(PLAYER_OPTION).getAsUser().getId();
+        final String opponentId = event.getOption(OptionName.PLAYER_OPTION).getAsUser().getId();
         if (!playerRepository.existsByDiscordId(opponentId)) {
             event.reply(Message.OPPONENT_NOT_REGISTERED).setEphemeral(true).queue();
             return;
@@ -78,7 +78,7 @@ public class Ft7Command implements Command {
         duelEntity.setOpponent(opponent);
         final DuelEntity savedDuel = duelRepository.save(duelEntity);
 
-        event.getOption(PLAYER_OPTION).getAsUser()
+        event.getOption(OptionName.PLAYER_OPTION).getAsUser()
                 .openPrivateChannel()
                 .queue((channel) -> channel.sendMessage(Message.FT7_CHALLENGE_RECEIVED
                                 .formatted(challenger.getUsername()))

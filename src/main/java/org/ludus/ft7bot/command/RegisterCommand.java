@@ -16,6 +16,7 @@ import java.util.List;
 
 @Component
 public class RegisterCommand implements Command {
+    private static final int MAX_USERNAME_LENGTH = 100;
     private static final Logger LOG = LoggerFactory.getLogger(RegisterCommand.class);
     private final PlayerRepository playerRepository;
 
@@ -38,7 +39,7 @@ public class RegisterCommand implements Command {
         return List.of(new OptionData(OptionType.STRING,
                 OptionName.USERNAME_OPTION,
                 "The name to be used in the duelling leaderboard",
-                true));
+                true).setMaxLength(MAX_USERNAME_LENGTH));
     }
 
     @Override

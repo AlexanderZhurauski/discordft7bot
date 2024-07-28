@@ -1,5 +1,6 @@
 package org.ludus.ft7bot.service;
 
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.ludus.ft7bot.constant.Message;
 import org.ludus.ft7bot.entity.DuelEntity;
 import org.ludus.ft7bot.entity.DuelResultEntity;
@@ -9,11 +10,15 @@ import org.ludus.ft7bot.repository.DuelRepository;
 import org.ludus.ft7bot.repository.DuelResultRepository;
 import org.ludus.ft7bot.repository.PlayerRepository;
 import org.ludus.ft7bot.util.EloUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class DuelService {
+    private static final Logger LOG = LoggerFactory.getLogger(DuelService.class);
     private final DuelRepository duelRepository;
     private final DuelResultRepository duelResultRepository;
     private final PlayerRepository playerRepository;
@@ -26,7 +31,6 @@ public class DuelService {
         this.playerRepository = playerRepository;
     }
 
-    @Transactional
     public String reportWinner(DuelEntity duelEntity, String reporterId, String opponentId, String winnerId) {
         String challengerId = duelEntity.getChallenger().getDiscordId();
 
@@ -40,7 +44,7 @@ public class DuelService {
         PlayerEntity winnerByOp = duelEntity.getReportedWinnerByOp();
         if (winnerByCh != null && winnerByOp != null) {
             if (winnerByCh.getDiscordId().equals(winnerByOp.getDiscordId())) {
-                reportWinner(duelEntity, reporterId, opponentId, winnerId);
+                saveConfirmedResult(duelEntity, reporterId, opponentId, winnerId);
                 return Message.FT7_RESULT_CONFIRMED.formatted(playerRepository.findByDiscordId(reporterId).getElo());
             } else {
                 return Message.FAILED_TO_CONFIRM_RESULT.formatted(opponentId);
@@ -49,6 +53,26 @@ public class DuelService {
             duelRepository.save(duelEntity);
             return Message.FT7_RESULT_REPORTED.formatted(playerRepository.findByDiscordId(opponentId).getUsername());
         }
+    }
+
+    public void updateChallengeStatus(ButtonInteractionEvent event, String duelId, DuelStatus status) {
+        DuelEntity duel = duelRepository.findById(Long.parseLong(duelId)).orElseThrow();
+        duel.setStatus(status);
+        duelRepository.save(duel);
+
+        String challengerDiscordId = duel.getChallenger().getDiscordId();
+        String challengerUsername = duel.getChallenger().getUsername();
+        String responseMessage = DuelStatus.ACCEPTED.equals(status)
+                ? Message.FT7_ACCEPTED_BY_OPPONENT.formatted(challengerUsername)
+                : Message.FT7_REJECTED_BY_OPPONENT.formatted(challengerUsername);
+        messageByDiscordId(event, challengerDiscordId, responseMessage);
+    }
+
+    private void messageByDiscordId(ButtonInteractionEvent event, String discordId, String message) {
+        event.getJDA().retrieveUserById(discordId)
+                .queue(user -> user.openPrivateChannel()
+                        .flatMap(channel -> channel.sendMessage(message))
+                        .queue(), throwable -> LOG.error(Message.USER_RETRIEVAL_FAILED, throwable));
     }
 
     private void saveConfirmedResult(DuelEntity duelEntity, String reporterId, String opponentId, String winnerId) {

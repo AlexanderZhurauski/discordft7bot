@@ -61,10 +61,10 @@ public class DuelService {
         duelRepository.save(duel);
 
         String challengerDiscordId = duel.getChallenger().getDiscordId();
-        String challengerUsername = duel.getChallenger().getUsername();
+        String opponentUsername = duel.getOpponent().getUsername();
         String responseMessage = DuelStatus.ACCEPTED.equals(status)
-                ? Message.FT7_ACCEPTED_BY_OPPONENT.formatted(challengerUsername)
-                : Message.FT7_REJECTED_BY_OPPONENT.formatted(challengerUsername);
+                ? Message.FT7_ACCEPTED_BY_OPPONENT.formatted(opponentUsername)
+                : Message.FT7_REJECTED_BY_OPPONENT.formatted(opponentUsername);
         messageByDiscordId(event, challengerDiscordId, responseMessage);
     }
 

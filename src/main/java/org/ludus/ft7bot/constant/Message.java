@@ -5,6 +5,7 @@ public interface Message {
      * Registration-related messages
      */
     String SUCCESSFUL_REGISTRATION = "%s has successfully been registered!";
+    String SUCCESSFUL_USERNAME_CHANGE = "Successfully changed username from %s to %s";
 
     /**
      * Ft7-related messages

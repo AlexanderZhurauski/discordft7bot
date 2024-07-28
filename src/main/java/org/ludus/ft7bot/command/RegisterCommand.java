@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.ludus.ft7bot.constant.CommandName;
 import org.ludus.ft7bot.constant.Message;
+import org.ludus.ft7bot.constant.OptionName;
 import org.ludus.ft7bot.entity.PlayerEntity;
 import org.ludus.ft7bot.repository.PlayerRepository;
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import java.util.List;
 @Component
 public class RegisterCommand implements Command {
     private static final Logger LOG = LoggerFactory.getLogger(RegisterCommand.class);
-    private static final String USERNAME_OPTION = "username";
     private final PlayerRepository playerRepository;
 
     public RegisterCommand(PlayerRepository playerRepository) {
@@ -36,7 +36,7 @@ public class RegisterCommand implements Command {
     @Override
     public List<OptionData> getOptions() {
         return List.of(new OptionData(OptionType.STRING,
-                USERNAME_OPTION,
+                OptionName.USERNAME_OPTION,
                 "The name to be used in the duelling leaderboard",
                 true));
     }
@@ -50,7 +50,7 @@ public class RegisterCommand implements Command {
                 return;
             }
 
-            final String username = event.getOption(USERNAME_OPTION).getAsString();
+            final String username = event.getOption(OptionName.USERNAME_OPTION).getAsString();
             if (playerRepository.existsByUsername(username)) {
                 event.reply(Message.USERNAME_ALREADY_REGISTERED).setEphemeral(true).queue();
                 return;

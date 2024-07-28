@@ -1,9 +1,13 @@
 package org.ludus.ft7bot.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * Shamelessly "borrowed" from <a href="https://www.geeksforgeeks.org/elo-rating-algorithm/"></a>
  */
-public class EloUtil {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class EloUtil {
     public static final int WIN = 1;
     public static final int LOSS = 0;
     private static final int K = 32; // This is a typical value but can be adjusted depending on the level of the players

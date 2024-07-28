@@ -7,10 +7,9 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.ludus.ft7bot.constant.Buttons;
 import org.ludus.ft7bot.constant.CommandName;
 import org.ludus.ft7bot.constant.Message;
-import org.ludus.ft7bot.entity.DuelResultEntity;
+import org.ludus.ft7bot.entity.DuelEntity;
 import org.ludus.ft7bot.entity.PlayerEntity;
-import org.ludus.ft7bot.model.DuelStatus;
-import org.ludus.ft7bot.repository.DuelResultRepository;
+import org.ludus.ft7bot.repository.DuelRepository;
 import org.ludus.ft7bot.repository.PlayerRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +19,11 @@ import java.util.List;
 @Component
 public class Ft7Command implements Command {
     private static final String PLAYER_OPTION = "player";
-    private final DuelResultRepository duelResultRepository;
+    private final DuelRepository duelRepository;
     private final PlayerRepository playerRepository;
 
-    public Ft7Command(DuelResultRepository duelResultRepository, PlayerRepository playerRepository) {
-        this.duelResultRepository = duelResultRepository;
+    public Ft7Command(DuelRepository duelRepository, PlayerRepository playerRepository) {
+        this.duelRepository = duelRepository;
         this.playerRepository = playerRepository;
     }
 
@@ -66,14 +65,18 @@ public class Ft7Command implements Command {
             return;
         }
 
+        if (duelRepository.existsByParticipantIds(challengerId, opponentId)) {
+            event.reply(Message.DUEL_ALREADY_IN_PROGRESS).setEphemeral(true).queue();
+            return;
+        }
+
         final PlayerEntity challenger = playerRepository.findByDiscordId(challengerId);
         final PlayerEntity opponent = playerRepository.findByDiscordId(opponentId);
 
-        final DuelResultEntity duelResultEntity = new DuelResultEntity();
-        duelResultEntity.setChallenger(challenger);
-        duelResultEntity.setOpponent(opponent);
-        duelResultEntity.setDuelStatus(DuelStatus.PENDING);
-        final DuelResultEntity savedDuelResultEntity = duelResultRepository.save(duelResultEntity);
+        final DuelEntity duelEntity = new DuelEntity();
+        duelEntity.setChallenger(challenger);
+        duelEntity.setOpponent(opponent);
+        final DuelEntity savedDuel = duelRepository.save(duelEntity);
 
         event.getOption(PLAYER_OPTION).getAsUser()
                 .openPrivateChannel()
@@ -81,9 +84,9 @@ public class Ft7Command implements Command {
                                 .formatted(challenger.getUsername()))
                         .setActionRow(
                                 Button.primary(Buttons.ACCEPTED_BUTTON + Buttons.SEPARATOR
-                                        + savedDuelResultEntity.getNumId(), "Accept"),
+                                        + savedDuel.getNumId(), "Accept"),
                                 Button.danger(Buttons.REJECTED_BUTTON + Buttons.SEPARATOR
-                                        + savedDuelResultEntity.getNumId(), "Reject")
+                                        + savedDuel.getNumId(), "Reject")
                         ).queue());
         event.reply(Message.FT7_CHALLENGE_SENT.formatted(opponent.getUsername())).setEphemeral(true).queue();
     }

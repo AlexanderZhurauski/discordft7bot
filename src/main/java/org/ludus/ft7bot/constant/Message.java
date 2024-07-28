@@ -15,10 +15,14 @@ public interface Message {
     String FT7_REJECTED_BY_OPPONENT = "%s has rejected your challenge.";
     String FT7_ACCEPTED_BY_YOURSELF = "You have accepted the challenge!";
     String FT7_REJECTED_BY_YOURSELF = "You have rejected the challenge.";
+    String FT7_RESULT_REPORTED = "The result has been reported successfully. Awaiting confirmation from %s.";
+    String FT7_RESULT_CONFIRMED = "Successfully confirmed the result! Your new rating is: %f";
 
     /**
      * Error messages
      */
+    String FAILED_TO_CONFIRM_RESULT = "Failed to confirm the result! The winners reported by you and %s don't match.";
+    String DUEL_ALREADY_IN_PROGRESS = "There is either a pending ft7 or ft7 request between you and the requested opponent.";
     String REQUESTED_DUEL_NOT_FOUND = "The requested ft7 duel does not exist";
     String REGISTRATION_UNEXPECTED_ERROR = "Unexpected error during registration, please contact the server administrator.";
     String CHALLENGER_NOT_REGISTERED = "Please register in the ft7 system using the '/register <username>' command.";

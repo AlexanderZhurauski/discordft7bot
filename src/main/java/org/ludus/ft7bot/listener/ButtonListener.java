@@ -4,9 +4,9 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.ludus.ft7bot.constant.Buttons;
 import org.ludus.ft7bot.constant.Message;
-import org.ludus.ft7bot.entity.DuelResultEntity;
+import org.ludus.ft7bot.entity.DuelEntity;
 import org.ludus.ft7bot.model.DuelStatus;
-import org.ludus.ft7bot.repository.DuelResultRepository;
+import org.ludus.ft7bot.repository.DuelRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ButtonListener extends ListenerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(ButtonListener.class);
-    private final DuelResultRepository duelResultRepository;
+    private final DuelRepository duelRepository;
 
-    public ButtonListener(DuelResultRepository duelResultRepository) {
-        this.duelResultRepository = duelResultRepository;
+    public ButtonListener(DuelRepository duelRepository) {
+        this.duelRepository = duelRepository;
     }
 
     @Override
@@ -34,12 +34,12 @@ public class ButtonListener extends ListenerAdapter {
     }
 
     private void updateChallengeStatus(ButtonInteractionEvent event, String duelId, DuelStatus status) {
-        DuelResultEntity duelResult = duelResultRepository.findById(Long.parseLong(duelId)).orElseThrow();
-        duelResult.setDuelStatus(status);
-        duelResultRepository.save(duelResult);
+        DuelEntity duel = duelRepository.findById(Long.parseLong(duelId)).orElseThrow();
+        duel.setStatus(status);
+        duelRepository.save(duel);
 
-        String challengerDiscordId = duelResult.getChallenger().getDiscordId();
-        String challengerUsername = duelResult.getChallenger().getUsername();
+        String challengerDiscordId = duel.getChallenger().getDiscordId();
+        String challengerUsername = duel.getChallenger().getUsername();
         String responseMessage = DuelStatus.ACCEPTED.equals(status)
                 ? Message.FT7_ACCEPTED_BY_OPPONENT.formatted(challengerUsername)
                 : Message.FT7_REJECTED_BY_OPPONENT.formatted(challengerUsername);

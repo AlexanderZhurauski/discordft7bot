@@ -33,6 +33,7 @@ public class LeaderboardCommand implements Command {
         return null;
     }
 
+    //TODO: implement pagination and special emojis for the top 3
     @Override
     public void execute(SlashCommandInteractionEvent event) {
         EmbedBuilder eb = new EmbedBuilder();

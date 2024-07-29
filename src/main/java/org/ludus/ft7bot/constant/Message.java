@@ -5,6 +5,7 @@ public interface Message {
      * Registration-related messages
      */
     String SUCCESSFUL_REGISTRATION = "%s has successfully been registered!";
+    String SUCCESSFUL_USERNAME_CHANGE = "Successfully changed username from %s to %s";
 
     /**
      * Ft7-related messages
@@ -21,6 +22,7 @@ public interface Message {
     /**
      * Error messages
      */
+    String INVALID_WINNER_SPECIFIED = "The specified winner is not part of the duel";
     String FAILED_TO_CONFIRM_RESULT = "Failed to confirm the result! The winners reported by you and %s don't match.";
     String DUEL_ALREADY_IN_PROGRESS = "There is either a pending ft7 or ft7 request between you and the requested opponent.";
     String REQUESTED_DUEL_NOT_FOUND = "The requested ft7 duel does not exist";

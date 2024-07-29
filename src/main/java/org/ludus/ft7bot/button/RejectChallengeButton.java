@@ -19,6 +19,7 @@ public class RejectChallengeButton implements ButtonAction {
     public void execute(ButtonInteractionEvent event) {
         String duelId = event.getButton().getId().split(Buttons.SEPARATOR)[1];
         duelService.updateChallengeStatus(event, duelId, DuelStatus.CANCELLED);
+        event.getMessage().editMessageComponents().queue();
         event.reply(Message.FT7_REJECTED_BY_YOURSELF).setEphemeral(true).queue();
     }
 

@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.ludus.ft7bot.constant.CommandName;
 import org.ludus.ft7bot.constant.Message;
+import org.ludus.ft7bot.constant.OptionName;
 import org.ludus.ft7bot.entity.DuelEntity;
 import org.ludus.ft7bot.repository.DuelRepository;
 import org.ludus.ft7bot.service.DuelService;
@@ -15,8 +16,6 @@ import java.util.List;
 
 @Component
 public class ReportResultCommand implements Command {
-    private static final String OPPONENT_OPTION =  "opponent";
-    private static final String WINNER_OPTION = "winner";
     private final DuelService duelService;
     private final DuelRepository duelRepository;
 
@@ -39,11 +38,11 @@ public class ReportResultCommand implements Command {
     public List<OptionData> getOptions() {
         return List.of(
                 new OptionData(OptionType.USER,
-                        OPPONENT_OPTION,
+                        OptionName.OPPONENT_OPTION,
                         "Your opponent in the ft7",
                         true),
                 new OptionData(OptionType.USER,
-                        WINNER_OPTION,
+                        OptionName.WINNER_OPTION,
                         "The winner of the ft7",
                         true)
                 );
@@ -52,13 +51,20 @@ public class ReportResultCommand implements Command {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
         User reporter = event.getUser();
-        User opponent = event.getOption(OPPONENT_OPTION).getAsUser();
+        User opponent = event.getOption(OptionName.OPPONENT_OPTION).getAsUser();
+
         DuelEntity duelEntity = duelRepository.findAcceptedDuelByParticipantIds(reporter.getId(), opponent.getId());
         if (duelEntity == null) {
             event.reply(Message.REQUESTED_DUEL_NOT_FOUND).setEphemeral(true).queue();
             return;
         }
-        String winnerId = event.getOption(WINNER_OPTION).getAsUser().getId();
+
+        String winnerId = event.getOption(OptionName.WINNER_OPTION).getAsUser().getId();
+        if (!duelEntity.getChallenger().getDiscordId().equals(winnerId)
+                && !duelEntity.getOpponent().getDiscordId().equals(winnerId)) {
+            event.reply(Message.INVALID_WINNER_SPECIFIED).setEphemeral(true).queue();
+        }
+
         event.reply(duelService.reportWinner(duelEntity, reporter.getId(), opponent.getId(), winnerId)).setEphemeral(true).queue();
     }
 }

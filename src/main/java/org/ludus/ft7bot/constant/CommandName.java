@@ -6,4 +6,6 @@ public interface CommandName {
     String REPORT_RESULT = "report_result";
     String LEADERBOARD = "leaderboard";
     String CHANGE_NICKNAME = "change_nickname";
+    String CANCEL_DUEL = "cancel_duel";
+    String MY_RATING = "my_rating";
 }

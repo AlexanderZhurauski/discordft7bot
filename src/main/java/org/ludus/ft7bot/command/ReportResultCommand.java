@@ -65,6 +65,6 @@ public class ReportResultCommand implements Command {
             event.reply(Message.INVALID_WINNER_SPECIFIED).setEphemeral(true).queue();
         }
 
-        event.reply(duelService.reportWinner(duelEntity, reporter.getId(), opponent.getId(), winnerId)).setEphemeral(true).queue();
+        event.reply(duelService.reportWinner(event, duelEntity, reporter.getId(), opponent.getId(), winnerId)).setEphemeral(true).queue();
     }
 }

@@ -1,5 +1,6 @@
 package org.ludus.ft7bot.service;
 
+import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.ludus.ft7bot.constant.Buttons;
@@ -33,7 +34,7 @@ public class DuelService {
         this.playerRepository = playerRepository;
     }
 
-    public String reportWinner(DuelEntity duelEntity, String reporterId, String opponentId, String winnerId) {
+    public String reportWinner(Event event, DuelEntity duelEntity, String reporterId, String opponentId, String winnerId) {
         String challengerId = duelEntity.getChallenger().getDiscordId();
 
         if (reporterId.equals(challengerId)) {
@@ -47,6 +48,12 @@ public class DuelService {
         if (winnerByCh != null && winnerByOp != null) {
             if (winnerByCh.getDiscordId().equals(winnerByOp.getDiscordId())) {
                 saveConfirmedResult(duelEntity, reporterId, opponentId, winnerId);
+
+                event.getJDA().retrieveUserById(opponentId)
+                        .queue(user -> user.openPrivateChannel()
+                                .flatMap(channel -> channel.sendMessage(Message.FT7_RESULT_CONFIRMED.formatted(playerRepository.findByDiscordId(opponentId).getElo())))
+                                .queue(), throwable -> LOG.error(Message.USER_RETRIEVAL_FAILED, throwable));
+
                 return Message.FT7_RESULT_CONFIRMED.formatted(playerRepository.findByDiscordId(reporterId).getElo());
             } else {
                 return Message.FAILED_TO_CONFIRM_RESULT.formatted(playerRepository.findByDiscordId(opponentId).getUsername());

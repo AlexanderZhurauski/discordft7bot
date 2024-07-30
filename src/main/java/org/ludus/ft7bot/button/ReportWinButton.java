@@ -29,9 +29,9 @@ public class ReportWinButton implements ButtonAction {
             event.getMessage().editMessageComponents().queue();
             return;
         }
-        String opponentId = reporterId.equals(duelEntity.getChallenger().getDiscordId()) ? duelEntity.getOpponent().getDiscordId() : reporterId;
+        String opponentId = reporterId.equals(duelEntity.getChallenger().getDiscordId()) ? duelEntity.getOpponent().getDiscordId() : duelEntity.getChallenger().getDiscordId();
         event.getMessage().editMessageComponents().queue();
-        event.reply(duelService.reportWinner(duelEntity, reporterId, opponentId, reporterId)).setEphemeral(true).queue();
+        event.reply(duelService.reportWinner(event, duelEntity, reporterId, opponentId, reporterId)).setEphemeral(true).queue();
     }
 
     @Override

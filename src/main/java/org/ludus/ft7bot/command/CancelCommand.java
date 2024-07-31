@@ -11,15 +11,13 @@ import org.ludus.ft7bot.entity.DuelEntity;
 import org.ludus.ft7bot.model.DuelStatus;
 import org.ludus.ft7bot.repository.DuelRepository;
 import org.ludus.ft7bot.repository.PlayerRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ludus.ft7bot.util.MessageUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class CancelCommand implements Command {
-    private static final Logger LOG = LoggerFactory.getLogger(CancelCommand.class);
     private final DuelRepository duelRepository;
     private final PlayerRepository playerRepository;
 
@@ -60,14 +58,7 @@ public class CancelCommand implements Command {
         duelEntity.setStatus(DuelStatus.CANCELLED);
         duelRepository.save(duelEntity);
         String opponentId = reporter.getId().equals(duelEntity.getChallenger().getDiscordId()) ? duelEntity.getOpponent().getDiscordId() : reporter.getId();
-        messageByDiscordId(event, opponentId, Message.FT7_CANCELLED_SUCCESSFULLY.formatted(playerRepository.findByDiscordId(reporter.getId()).getUsername()));
+        MessageUtil.sendByDiscordId(event, opponentId, Message.FT7_CANCELLED_SUCCESSFULLY.formatted(playerRepository.findByDiscordId(reporter.getId()).getUsername()));
         event.reply(Message.FT7_CANCELLED_SUCCESSFULLY.formatted(playerRepository.findByDiscordId(opponentId).getUsername())).setEphemeral(true).queue();
-    }
-
-    private void messageByDiscordId(SlashCommandInteractionEvent event, String discordId, String message) {
-        event.getJDA().retrieveUserById(discordId)
-                .queue(user -> user.openPrivateChannel()
-                        .flatMap(channel -> channel.sendMessage(message))
-                        .queue(), throwable -> LOG.error(Message.USER_RETRIEVAL_FAILED, throwable));
     }
 }

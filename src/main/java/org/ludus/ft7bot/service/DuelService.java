@@ -13,6 +13,7 @@ import org.ludus.ft7bot.repository.DuelRepository;
 import org.ludus.ft7bot.repository.DuelResultRepository;
 import org.ludus.ft7bot.repository.PlayerRepository;
 import org.ludus.ft7bot.util.EloUtil;
+import org.ludus.ft7bot.util.MessageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -48,12 +49,7 @@ public class DuelService {
         if (winnerByCh != null && winnerByOp != null) {
             if (winnerByCh.getDiscordId().equals(winnerByOp.getDiscordId())) {
                 saveConfirmedResult(duelEntity, reporterId, opponentId, winnerId);
-
-                event.getJDA().retrieveUserById(opponentId)
-                        .queue(user -> user.openPrivateChannel()
-                                .flatMap(channel -> channel.sendMessage(Message.FT7_RESULT_CONFIRMED.formatted(playerRepository.findByDiscordId(opponentId).getElo())))
-                                .queue(), throwable -> LOG.error(Message.USER_RETRIEVAL_FAILED, throwable));
-
+                MessageUtil.sendByDiscordId(event, opponentId, Message.FT7_RESULT_CONFIRMED.formatted(playerRepository.findByDiscordId(opponentId).getElo()));
                 return Message.FT7_RESULT_CONFIRMED.formatted(playerRepository.findByDiscordId(reporterId).getElo());
             } else {
                 return Message.FAILED_TO_CONFIRM_RESULT.formatted(playerRepository.findByDiscordId(opponentId).getUsername());
@@ -74,19 +70,9 @@ public class DuelService {
         String responseMessage = DuelStatus.ACCEPTED.equals(status)
                 ? Message.FT7_ACCEPTED_BY_OPPONENT.formatted(opponentUsername)
                 : Message.FT7_REJECTED_BY_OPPONENT.formatted(opponentUsername);
-        messageByDiscordId(event, challengerDiscordId, responseMessage, duel.getNumId());
-    }
-
-    private void messageByDiscordId(ButtonInteractionEvent event, String discordId, String message, Long numId) {
-        event.getJDA().retrieveUserById(discordId)
-                .queue(user -> user.openPrivateChannel()
-                        .flatMap(channel -> channel.sendMessage(message)
-                                .addActionRow(
-                                        Button.primary(Buttons.REPORT_WIN_BUTTON + Buttons.SEPARATOR + numId, "Win"),
-                                        Button.secondary(Buttons.CANCEL_DUEL + Buttons.SEPARATOR + numId, "Cancel"),
-                                        Button.danger(Buttons.REPORT_LOSS_BUTTON + Buttons.SEPARATOR + numId, "Loss")
-                                ))
-                        .queue(), throwable -> LOG.error(Message.USER_RETRIEVAL_FAILED, throwable));
+        MessageUtil.sendByDiscordId(event, challengerDiscordId, responseMessage, Button.primary(Buttons.REPORT_WIN_BUTTON + Buttons.SEPARATOR + duel.getNumId(), "Win"),
+                Button.secondary(Buttons.CANCEL_DUEL + Buttons.SEPARATOR + duel.getNumId(), "Cancel"),
+                Button.danger(Buttons.REPORT_LOSS_BUTTON + Buttons.SEPARATOR + duel.getNumId(), "Loss"));
     }
 
     private void saveConfirmedResult(DuelEntity duelEntity, String reporterId, String opponentId, String winnerId) {

@@ -7,13 +7,11 @@ import org.ludus.ft7bot.entity.DuelEntity;
 import org.ludus.ft7bot.model.DuelStatus;
 import org.ludus.ft7bot.repository.DuelRepository;
 import org.ludus.ft7bot.repository.PlayerRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ludus.ft7bot.util.MessageUtil;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CancelDuelButton implements ButtonAction {
-    private static final Logger LOG = LoggerFactory.getLogger(CancelDuelButton.class);
     private final DuelRepository duelRepository;
     private final PlayerRepository playerRepository;
 
@@ -29,26 +27,19 @@ public class CancelDuelButton implements ButtonAction {
         DuelEntity duelEntity = duelRepository.findById(Long.parseLong(duelId)).orElseThrow();
         if (DuelStatus.CANCELLED.equals(duelEntity.getStatus()) || DuelStatus.FINISHED.equals(duelEntity.getStatus())) {
             event.reply(Message.DUEL_FINISHED_OR_CANCELLED).setEphemeral(true).queue();
-            event.getMessage().editMessageComponents().queue();
+            MessageUtil.clearButtons(event);
             return;
         }
         duelEntity.setStatus(DuelStatus.CANCELLED);
         duelRepository.save(duelEntity);
-        event.getMessage().editMessageComponents().queue();
+        MessageUtil.clearButtons(event);
         String opponentId = reporterId.equals(duelEntity.getChallenger().getDiscordId()) ? duelEntity.getOpponent().getDiscordId() : reporterId;
-        messageByDiscordId(event, opponentId, Message.FT7_CANCELLED_SUCCESSFULLY.formatted(playerRepository.findByDiscordId(reporterId).getUsername()));
+        MessageUtil.sendByDiscordId(event, opponentId, Message.FT7_CANCELLED_SUCCESSFULLY.formatted(playerRepository.findByDiscordId(reporterId).getUsername()));
         event.reply(Message.FT7_CANCELLED_SUCCESSFULLY.formatted(playerRepository.findByDiscordId(opponentId).getUsername())).setEphemeral(true).queue();
     }
 
     @Override
     public String getAction() {
         return Buttons.CANCEL_DUEL;
-    }
-
-    private void messageByDiscordId(ButtonInteractionEvent event, String discordId, String message) {
-        event.getJDA().retrieveUserById(discordId)
-                .queue(user -> user.openPrivateChannel()
-                        .flatMap(channel -> channel.sendMessage(message))
-                        .queue(), throwable -> LOG.error(Message.USER_RETRIEVAL_FAILED, throwable));
     }
 }
